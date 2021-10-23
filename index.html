@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link href="app.f454a67f.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="bootstrap.min.2e858bcc.css" media="screen,projection" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Document</title>
+<script src="app.f454a67f.js"></script><script src="bootstrap.min.2e858bcc.js"></script></head>
+<body>
+<button id="toDxf">toDxf()</button>
+<div class="Height">
+    высота:
+    <input id="Height" min="0" type="number" value="0">
+    <select aria-label="Durability" id="relAdd">
+        <option value="0,9">0,9</option>
+        <option value="0,99">0,99</option>
+        <option value="0,999">0,999</option>
+    </select>
+    <button class="btn btn-success" id="HBut">Set</button>
+    <input checked="" id="Rd" name="Rd" type="checkbox">
+</div>
+<tr>
+    <td>Select a File to Load:</td>
+    <td><input id="file" type="file"></td>
+    <td>
+        <button id="fileButton">Load Selected File</button>
+    </td><td>
+
+</td></tr>
+<div class="Cones_scroll border_red list-group">
+    <li>
+        <label for="layerName">name:</label><input id="layerName" type="text">
+        <label for="layerHeight">height:</label><input id="layerHeight" type="number">
+        <button class="btn btn-success" id="AddLayer">Add</button>
+    </li>
+    <ol id="LayerList">
+    
+    </ol>
+</div>
+<div class="parse">
+    <label for="Scale">Scale: 1/</label><input id="Scale" type="number" value="1">
+    <button id="parseButton">Parse rods</button>
+</div>
+<canvas class="border_red" id="App"></canvas>
+<canvas class="border_red" id="MApp"></canvas>
+<div class="Cones_scroll border_red list-group">
+    <ol id="ConesList">
+        <li>
+            x:<input id="xAdd" type="number">
+            y:<input id="yAdd" type="number"> h:<input id="hAdd" type="number" value="40">
+            <button class="btn btn-success" id="AddRod">Add</button>
+        </li>
+    </ol>
+</div>
+<div id="3d"></div>
+<div id="showDxf" class="border_red"></div>
+<script class="border_red" src="app.5cec07dd.js"></script>
+</body>
+</html>
+
