@@ -52880,13 +52880,17 @@ function () {
     this.canvas = canvasContext;
     this.autocad = writerDXF;
     this.scale = scale;
+    this.circlesList = [''];
   }
 
-  Writer.prototype.fill = function () {
-    this.autocad;
-  };
-
   Writer.prototype.DrawCircle = function (point, radius) {
+    var circleCode = "x" + point.x + "y" + point.y + "r" + radius;
+
+    if (this.circlesList.indexOf(circleCode) > -1) {
+      return;
+    }
+
+    this.circlesList.push(circleCode);
     this.canvas.beginPath();
     this.canvas.arc(point.x, point.y, radius, 0, 2 * Math.PI);
     this.canvas.stroke();
@@ -53444,7 +53448,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63012" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49545" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
