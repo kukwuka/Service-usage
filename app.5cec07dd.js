@@ -957,55 +957,72 @@ var _stringify = _interopRequireDefault(require("./stringify.js"));
 var _parse = _interopRequireDefault(require("./parse.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./v1.js":"node_modules/uuid/dist/esm-browser/v1.js","./v3.js":"node_modules/uuid/dist/esm-browser/v3.js","./v4.js":"node_modules/uuid/dist/esm-browser/v4.js","./v5.js":"node_modules/uuid/dist/esm-browser/v5.js","./nil.js":"node_modules/uuid/dist/esm-browser/nil.js","./version.js":"node_modules/uuid/dist/esm-browser/version.js","./validate.js":"node_modules/uuid/dist/esm-browser/validate.js","./stringify.js":"node_modules/uuid/dist/esm-browser/stringify.js","./parse.js":"node_modules/uuid/dist/esm-browser/parse.js"}],"src/constants/SingleLightningRod.ts":[function(require,module,exports) {
+},{"./v1.js":"node_modules/uuid/dist/esm-browser/v1.js","./v3.js":"node_modules/uuid/dist/esm-browser/v3.js","./v4.js":"node_modules/uuid/dist/esm-browser/v4.js","./v5.js":"node_modules/uuid/dist/esm-browser/v5.js","./nil.js":"node_modules/uuid/dist/esm-browser/nil.js","./version.js":"node_modules/uuid/dist/esm-browser/version.js","./validate.js":"node_modules/uuid/dist/esm-browser/validate.js","./stringify.js":"node_modules/uuid/dist/esm-browser/stringify.js","./parse.js":"node_modules/uuid/dist/esm-browser/parse.js"}],"src/constants/reliability.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.RodParametrs = exports.ReliabilityOfLightningRod = void 0;
+exports.ReliabilityOfLightningRod = exports.RodParameters = void 0;
 
-var RodParametrs =
+var RodParameters =
 /** @class */
 function () {
-  function RodParametrs(h0Koef, r0) {
+  function RodParameters(h0Koef, r0, Lmax, Lc) {
+    if (Lmax === void 0) {
+      Lmax = function Lmax(h) {
+        return 5 * h;
+      };
+    }
+
+    if (Lc === void 0) {
+      Lc = function Lc(h) {
+        return 2.5 * h;
+      };
+    }
+
     this.h0Koef = h0Koef;
     this.r0 = r0;
-
-    this.Lmax = function (h) {
-      return 5 * h;
-    };
-
-    this.Lc = function (h) {
-      return 2.5 * h;
-    };
+    this.Lmax = Lmax;
+    this.Lc = Lc;
   }
 
-  return RodParametrs;
+  return RodParameters;
 }();
 
-exports.RodParametrs = RodParametrs;
+exports.RodParameters = RodParameters;
 
 function ReliabilityOfLightningRod(reliability, h) {
   switch (reliability) {
     case '0,9':
       switch (true) {
-        case h > 100 || h <= 150:
-          return new RodParametrs(function (h) {
+        case h > 100 && h <= 150:
+          return new RodParameters(function (h) {
             return 0.85 * h;
           }, function (h) {
             return (1.2 - Math.pow(10, -3) * (h - 100)) * h;
           });
 
-        case h <= 100:
-          return new RodParametrs(function (h) {
+        case 30 <= h && h <= 100:
+          return new RodParameters(function (h) {
             return 0.85 * h;
           }, function (h) {
             return 1.2 * h;
+          }, function (h) {
+            return 5.75 * h;
+          });
+
+        case 30 > h:
+          return new RodParameters(function (h) {
+            return 0.85 * h;
+          }, function (h) {
+            return 1.2 * h;
+          }, function (h) {
+            return 5.75 * h;
           });
 
         default:
-          return new RodParametrs(function (h) {
+          return new RodParameters(function (h) {
             return 0.85 * h;
           }, function (h) {
             return 1.2 * h;
@@ -1014,29 +1031,29 @@ function ReliabilityOfLightningRod(reliability, h) {
 
     case '0,99':
       switch (true) {
-        case h > 100 || h <= 150:
-          return new RodParametrs(function (h) {
+        case h > 100 && h <= 150:
+          return new RodParameters(function (h) {
             return (0.8 - Math.pow(10, -3) * (h - 100)) * h;
           }, function (h) {
             return 0.7 * h;
           });
 
-        case h > 30 || h <= 100:
-          return new RodParametrs(function (h) {
+        case h > 30 && h <= 100:
+          return new RodParameters(function (h) {
             return 0.8 * h;
           }, function (h) {
             return (0.8 - 1.43 * Math.pow(10, -3) * (h - 30)) * h;
           });
 
         case h <= 30:
-          return new RodParametrs(function (h) {
+          return new RodParameters(function (h) {
             return 0.8 * h;
           }, function (h) {
             return 0.8 * h;
           });
 
         default:
-          return new RodParametrs(function (h) {
+          return new RodParameters(function (h) {
             return (0.8 - Math.pow(10, -3) * (h - 100)) * h;
           }, function (h) {
             return 0.8 * h;
@@ -1045,29 +1062,29 @@ function ReliabilityOfLightningRod(reliability, h) {
 
     case '0,999':
       switch (true) {
-        case h > 100 || h <= 150:
-          return new RodParametrs(function (h) {
+        case h > 100 && h <= 150:
+          return new RodParameters(function (h) {
             return (0.65 - Math.pow(10, -3) * (h - 100)) * h;
           }, function (h) {
             return 0.7 * h;
           });
 
-        case h > 30 || h <= 100:
-          return new RodParametrs(function (h) {
+        case h > 30 && h <= 100:
+          return new RodParameters(function (h) {
             return (0.7 - 7.14 * Math.pow(10, -4) * (h - 30)) * h;
           }, function (h) {
             return (0.6 - 1.43 * Math.pow(10, -3) * (h - 30)) * h;
           });
 
         case h <= 30:
-          return new RodParametrs(function (h) {
+          return new RodParameters(function (h) {
             return 0.7 * h;
           }, function (h) {
             return 0.6 * h;
           });
 
         default:
-          return new RodParametrs(function (h) {
+          return new RodParameters(function (h) {
             return (0.65 - Math.pow(10, -3) * (h - 100)) * h;
           }, function (h) {
             return 0.7 * h;
@@ -1087,7 +1104,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var uuid_1 = require("uuid");
 
-var SingleLightningRod_1 = require("../constants/SingleLightningRod");
+var reliability_1 = require("../constants/reliability");
 
 var Rod =
 /** @class */
@@ -1114,19 +1131,16 @@ function () {
       y: y
     };
     this.h = h;
-    this.uuid = uuid_1.v4(); // console.log(reliability)
-
-    var rodParameter = SingleLightningRod_1.ReliabilityOfLightningRod(reliability, h);
-    this.h0 = rodParameter.h0Koef(h);
-    this.r0 = rodParameter.r0(h);
-    this.Lmax = rodParameter.Lmax(h);
+    this.uuid = uuid_1.v4();
+    this.ReCountWithNewReliability(reliability);
   }
 
   Rod.prototype.ReCountWithNewReliability = function (reliability) {
-    var rodParameter = SingleLightningRod_1.ReliabilityOfLightningRod(reliability, this.h);
+    var rodParameter = reliability_1.ReliabilityOfLightningRod(reliability, this.h);
     this.h0 = rodParameter.h0Koef(this.h);
     this.r0 = rodParameter.r0(this.h);
     this.Lmax = rodParameter.Lmax(this.h);
+    this.Lc = rodParameter.Lc(this.h);
   };
 
   Rod.prototype.ClearInteractingRod = function () {
@@ -1146,14 +1160,18 @@ function () {
   };
 
   Rod.prototype.GetHc = function (distance) {
-    return (this.Lmax - distance) * this.h0 / (0.5 * this.Lmax);
+    if (distance < this.Lc) {
+      return this.h0;
+    }
+
+    return (this.Lmax - distance) * this.h0 / (this.Lmax - this.Lc);
   };
 
   return Rod;
 }();
 
 exports.default = Rod;
-},{"uuid":"node_modules/uuid/dist/esm-browser/index.js","../constants/SingleLightningRod":"src/constants/SingleLightningRod.ts"}],"node_modules/three/build/three.module.js":[function(require,module,exports) {
+},{"uuid":"node_modules/uuid/dist/esm-browser/index.js","../constants/reliability":"src/constants/reliability.ts"}],"node_modules/three/build/three.module.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50311,17 +50329,6 @@ function hide(el) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-function RotationDirection(p1x, p1y, p2x, p2y, p3x, p3y) {
-  if ((p3y - p1y) * (p2x - p1x) > (p2y - p1y) * (p3x - p1x)) return 1;else if ((p3y - p1y) * (p2x - p1x) == (p2y - p1y) * (p3x - p1x)) return 0;
-  return -1;
-}
-
-function containsSegment(x1, y1, x2, y2, sx, sy) {
-  if (x1 < x2 && x1 < sx && sx < x2) return true;else if (x2 < x1 && x2 < sx && sx < x1) return true;else if (y1 < y2 && y1 < sy && sy < y2) return true;else if (y2 < y1 && y2 < sy && sy < y1) return true;else if (x1 == sx && y1 == sy || x2 == sx && y2 == sy) return true;
-  return false;
-}
-
 var Utils = {
   GetDistanceBetween2Point: function GetDistanceBetween2Point(point1, point2) {
     return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2));
@@ -52894,7 +52901,6 @@ function () {
     this.canvas.beginPath();
     this.canvas.arc(point.x, point.y, radius, 0, 2 * Math.PI);
     this.canvas.stroke();
-    console.log(point.x * this.scale, point.y * this.scale, radius * this.scale);
     this.autocad.addCircle(point.x * this.scale, point.y * this.scale, radius * this.scale);
   };
 
@@ -52903,7 +52909,6 @@ function () {
     this.canvas.moveTo(line.point1.x, line.point1.y);
     this.canvas.lineTo(line.point2.x, line.point2.y);
     this.canvas.stroke();
-    console.log(line.point1.x * this.scale, line.point1.y * this.scale, line.point2.x * this.scale, line.point2.y * this.scale);
     this.autocad.addLine(line.point1.x * this.scale, line.point1.y * this.scale, line.point2.x * this.scale, line.point2.y * this.scale);
   };
 
@@ -52992,10 +52997,11 @@ function () {
     this.dxfRodsParse = document.getElementById('parseButton');
     this.dxfRodsParse.addEventListener('click', this.GetRodsFromDxf.bind(this));
     var toDfxElement = document.getElementById('toDxf');
-    toDfxElement.addEventListener('click', this.ToDxfFile.bind(this)); // this.AddRod(222, 314, 40, '0,9')
-    // this.AddRod(124, 142, 40, '0,9')
+    toDfxElement.addEventListener('click', this.ToDxfFile.bind(this)); // this.AddRod(120, 120, 15.85, '0,9')
+    // this.AddRod(120, 120 + 18.136, 15.85, '0,9')
 
-    this.RedrawAll(); // this.TestTangents()
+    this.RedrawAll();
+    console.log(this.Rods); // this.TestTangents()
   }
 
   EzopService.prototype.TestTangents = function () {//
@@ -53054,8 +53060,7 @@ function () {
   EzopService.prototype.GetRodsFromDxf = function () {
     var rodsDesc = this.Reader.GetRods();
     var scale = parseInt(this.Scale.value);
-    scale = Number.isNaN(scale) && 0 === scale ? 1 : scale;
-    console.log(scale);
+    scale = Number.isNaN(scale) && 0 === scale ? 1 : scale; // console.log(scale)
 
     for (var _i = 0, rodsDesc_1 = rodsDesc; _i < rodsDesc_1.length; _i++) {
       var rodDesc = rodsDesc_1[_i];
@@ -53216,8 +53221,8 @@ function () {
 
   EzopService.prototype.DrawInteractingRods = function (point1, point2, rx, rcx, rxOneMore, rcxOneMore) {
     // console.log('start')
-    // console.log(rx)
-    // console.log(rcx)
+    console.log('rx', rx);
+    console.log('rcx', rcx);
     var angleBetween = utils_1.default.GetAngleBetween2points(point1, point2);
     var Ycent = point1.y - 0.5 * (point1.y - point2.y);
     var Xcent = point1.x - 0.5 * (point1.x - point2.x);
@@ -53448,7 +53453,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49545" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61595" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
