@@ -52888,6 +52888,8 @@ function () {
     this.autocad = writerDXF;
     this.scale = scale;
     this.circlesList = [''];
+    this.canvas.fillStyle = 'black';
+    this.canvas.strokeStyle = 'black';
   }
 
   Writer.prototype.DrawCircle = function (point, radius) {
@@ -52901,6 +52903,7 @@ function () {
     this.canvas.beginPath();
     this.canvas.arc(point.x, point.y, radius, 0, 2 * Math.PI);
     this.canvas.stroke();
+    this.canvas.fill();
     this.autocad.addCircle(point.x * this.scale, point.y * this.scale, radius * this.scale);
   };
 
@@ -52913,18 +52916,26 @@ function () {
   };
 
   Writer.prototype.DrawTriangle = function (point1, point2, point3) {
-    this.DrawLine({
-      point1: point1,
-      point2: point2
-    });
-    this.DrawLine({
-      point1: point2,
-      point2: point3
-    });
-    this.DrawLine({
-      point1: point3,
-      point2: point1
-    });
+    this.drawTriangleOnCanvas(point1, point2, point3);
+    this.autocad.addLine(point1.x * this.scale, point1.y * this.scale, point2.x * this.scale, point2.y * this.scale);
+    this.autocad.addLine(point2.x * this.scale, point2.y * this.scale, point3.x * this.scale, point3.y * this.scale);
+    this.autocad.addLine(point3.x * this.scale, point3.y * this.scale, point1.x * this.scale, point1.y * this.scale);
+  };
+
+  Writer.prototype.DrawTriangleOnCanvasAndFill = function (point1, point2, point3) {
+    this.drawTriangleOnCanvas(point1, point2, point3);
+    this.canvas.fill();
+  };
+
+  Writer.prototype.drawTriangleOnCanvas = function (point1, point2, point3) {
+    this.canvas.fillStyle = 'black';
+    this.canvas.strokeStyle = 'black';
+    this.canvas.beginPath();
+    this.canvas.moveTo(point1.x, point1.y);
+    this.canvas.lineTo(point2.x, point2.y);
+    this.canvas.lineTo(point3.x, point3.y);
+    this.canvas.closePath();
+    this.canvas.stroke();
   };
 
   return Writer;
@@ -52997,8 +53008,9 @@ function () {
     this.dxfRodsParse = document.getElementById('parseButton');
     this.dxfRodsParse.addEventListener('click', this.GetRodsFromDxf.bind(this));
     var toDfxElement = document.getElementById('toDxf');
-    toDfxElement.addEventListener('click', this.ToDxfFile.bind(this)); // this.AddRod(120, 120, 15.85, '0,9')
-    // this.AddRod(120, 120 + 18.136, 15.85, '0,9')
+    toDfxElement.addEventListener('click', this.ToDxfFile.bind(this)); // this.AddRod(120, 50, 40, '0,9')
+    // this.AddRod(120, 200, 40, '0,9')
+    // this.AddRod(250, 200, 40, '0,9')
 
     this.RedrawAll();
     console.log(this.Rods); // this.TestTangents()
@@ -53106,7 +53118,7 @@ function () {
     var text = this.Writer.stringify();
     var parser = new dxf_parser_1.default();
     var dxf = parser.parseSync(text);
-    new three_dxf_1.Viewer(dxf, parent, 800, 400); //
+    new three_dxf_1.Viewer(dxf, parent, 800, 400);
   };
 
   EzopService.prototype.CheckInteractingOfRods = function () {
@@ -53155,15 +53167,16 @@ function () {
     this.app3d.Setheight(height);
     this.heightCtx.clearRect(0, 0, this.heightCtx.canvas.width, this.heightCtx.canvas.height);
     this.drawGrid(300, 300, this.heightCtx);
+    console.log(this.Rods);
 
     for (var uuid in this.Rods) {
       var nowRod = this.Rods[uuid];
 
       if (nowRod.InteractingWithOtherRod()) {
-        var NowRodInreacting = nowRod.GetInteractingRodsList();
+        var NowRodInteracting = nowRod.GetInteractingRodsList();
 
-        for (var _i = 0, NowRodInreacting_1 = NowRodInreacting; _i < NowRodInreacting_1.length; _i++) {
-          var uuidInteracting = NowRodInreacting_1[_i];
+        for (var _i = 0, NowRodInteracting_1 = NowRodInteracting; _i < NowRodInteracting_1.length; _i++) {
+          var uuidInteracting = NowRodInteracting_1[_i];
           var nowCheckingRod = this.Rods[uuidInteracting];
           var distance = utils_1.default.GetDistanceBetween2Point(nowRod.point, nowCheckingRod.point);
 
@@ -53182,9 +53195,10 @@ function () {
 
                 for (var _a = 0, nowCheckingRodInreacting_1 = nowCheckingRodInreacting; _a < nowCheckingRodInreacting_1.length; _a++) {
                   var uuidRdCheckRod = nowCheckingRodInreacting_1[_a];
+                  var RdCheckRod = this.Rods[uuidRdCheckRod];
 
-                  if (uuidRdCheckRod === uuidInteracting || uuidRdCheckRod === uuid) {
-                    var RdCheckRod = this.Rods[uuidRdCheckRod];
+                  if (uuidRdCheckRod !== uuidInteracting && uuidRdCheckRod !== uuid && NowRodInteracting.indexOf(uuidRdCheckRod) > -1) {
+                    console.log(uuidRdCheckRod);
                     this.globWriter.DrawTriangle(nowRod.point, nowCheckingRod.point, RdCheckRod.point);
                   }
                 }
@@ -53220,9 +53234,6 @@ function () {
   };
 
   EzopService.prototype.DrawInteractingRods = function (point1, point2, rx, rcx, rxOneMore, rcxOneMore) {
-    // console.log('start')
-    console.log('rx', rx);
-    console.log('rcx', rcx);
     var angleBetween = utils_1.default.GetAngleBetween2points(point1, point2);
     var Ycent = point1.y - 0.5 * (point1.y - point2.y);
     var Xcent = point1.x - 0.5 * (point1.x - point2.x);
@@ -53261,14 +53272,23 @@ function () {
     }, centralLine, {
       point1: Rcx1,
       point2: tangents1.point1
-    });
+    }); // if (!Utils.LinesHasIntersection({point1: Rcx1, point2: tangents1OneMore.point1}, centralLine)) {
+    //
+    //     // this.globWriter.DrawLine({point1: Rcx1, point2: tangents1.point1})
+    // }
+
     this.CheckAndDrawTangent({
       point1: Rcx1,
       point2: tangents1OneMore.point2
     }, centralLine, {
       point1: Rcx1,
       point2: tangents1.point2
-    }); //2
+    });
+    this.globWriter.DrawTriangleOnCanvasAndFill(tangents1.point2, Rcx1, point1); // if (!Utils.LinesHasIntersection({point1: Rcx1, point2: tangents1OneMore.point2}, centralLine)) {
+    //     this.globWriter.DrawTriangle(tangents1.point2, Rcx1, point1)
+    //     // this.globWriter.DrawLine({point1: Rcx1, point2: tangents1.point1})
+    // }
+    //2
 
     this.CheckAndDrawTangent({
       point1: Rcx2,
@@ -53277,6 +53297,7 @@ function () {
       point1: Rcx2,
       point2: tangents2.point1
     });
+    this.globWriter.DrawTriangleOnCanvasAndFill(tangents2.point1, Rcx2, point1);
     this.CheckAndDrawTangent({
       point1: Rcx2,
       point2: tangents2OneMore.point2
@@ -53292,6 +53313,7 @@ function () {
       point1: Rcx2,
       point2: tangents3.point1
     });
+    this.globWriter.DrawTriangleOnCanvasAndFill(tangents3.point2, Rcx2, point2);
     this.CheckAndDrawTangent({
       point1: Rcx2,
       point2: tangents3OneMore.point2
@@ -53307,6 +53329,7 @@ function () {
       point1: Rcx1,
       point2: tangents4.point1
     });
+    this.globWriter.DrawTriangleOnCanvasAndFill(tangents4.point1, Rcx1, point2);
     this.CheckAndDrawTangent({
       point1: Rcx1,
       point2: tangents4OneMore.point2
@@ -53349,6 +53372,14 @@ function () {
       },
       point2: tangents.point2
     });
+    this.globWriter.DrawTriangleOnCanvasAndFill({
+      x: point1.x - Xlx,
+      y: point1.y - Ylx
+    }, tangents.point1, point1);
+    this.globWriter.DrawTriangleOnCanvasAndFill({
+      x: point1.x - Xlx,
+      y: point1.y - Ylx
+    }, tangents.point2, point1);
   };
 
   EzopService.prototype.AddRod = function (x, y, h, durability) {
@@ -53453,7 +53484,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61595" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58921" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
